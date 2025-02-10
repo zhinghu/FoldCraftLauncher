@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.mio.util.ImageUtil;
 import com.tungsten.fclauncher.utils.FCLPath;
 import com.tungsten.fclcore.util.io.FileUtils;
 import com.tungsten.fcllibrary.R;
@@ -84,6 +85,15 @@ public class ThemeEngine {
         }
     }
 
+    public void applyColor2(int color) {
+        theme.setColor2(color);
+        for (View view : runnables.keySet()) {
+            if (view != null && runnables.get(view) != null) {
+                handler.post(runnables.get(view));
+            }
+        }
+    }
+
     public void applyFullscreen(Window window, boolean fullscreen) {
         theme.setFullscreen(fullscreen);
         if (window != null) {
@@ -118,17 +128,10 @@ public class ThemeEngine {
         }
         Bitmap ltBitmap;
         Bitmap dkBitmap;
-        try {
-            ltBitmap = !new File(FCLPath.LT_BACKGROUND_PATH).exists() ? ConvertUtils.getBitmapFromRes(context, R.drawable.background_light) : BitmapFactory.decodeFile(FCLPath.LT_BACKGROUND_PATH);
-            dkBitmap = !new File(FCLPath.DK_BACKGROUND_PATH).exists() ? ConvertUtils.getBitmapFromRes(context, R.drawable.background_dark) : BitmapFactory.decodeFile(FCLPath.DK_BACKGROUND_PATH);
-        } catch (RuntimeException e) {
-            new File(FCLPath.LT_BACKGROUND_PATH).delete();
-            new File(FCLPath.DK_BACKGROUND_PATH).delete();
-            ltBitmap = ConvertUtils.getBitmapFromRes(context, R.drawable.background_light);
-            dkBitmap = ConvertUtils.getBitmapFromRes(context, R.drawable.background_dark);
-        }
-        BitmapDrawable lt = new BitmapDrawable(ltBitmap);
-        BitmapDrawable dk = new BitmapDrawable(dkBitmap);
+        ltBitmap = ImageUtil.load(FCLPath.LT_BACKGROUND_PATH).orElse(ConvertUtils.getBitmapFromRes(context, R.drawable.background_light));
+        dkBitmap = ImageUtil.load(FCLPath.DK_BACKGROUND_PATH).orElse(ConvertUtils.getBitmapFromRes(context, R.drawable.background_dark));
+        BitmapDrawable lt = new BitmapDrawable(context.getResources(), ltBitmap);
+        BitmapDrawable dk = new BitmapDrawable(context.getResources(), dkBitmap);
         theme.setBackgroundLt(lt);
         theme.setBackgroundDk(dk);
         boolean isNightMode = (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
@@ -137,6 +140,11 @@ public class ThemeEngine {
 
     public void applyAndSave(Context context, int color, boolean modified) {
         applyColor(color);
+        Theme.saveTheme(context, theme, modified);
+    }
+
+    public void applyAndSave2(Context context, int color, boolean modified) {
+        applyColor2(color);
         Theme.saveTheme(context, theme, modified);
     }
 

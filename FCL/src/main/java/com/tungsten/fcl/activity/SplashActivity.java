@@ -24,6 +24,8 @@ import com.tungsten.fcl.R;
 import com.tungsten.fcl.fragment.EulaFragment;
 import com.tungsten.fcl.fragment.RuntimeFragment;
 import com.tungsten.fcl.util.RequestCodes;
+import com.tungsten.fclauncher.plugins.DriverPlugin;
+import com.tungsten.fclauncher.plugins.RendererPlugin;
 import com.tungsten.fclauncher.utils.FCLPath;
 import com.tungsten.fclcore.util.Logging;
 import com.tungsten.fclcore.util.io.FileUtils;
@@ -40,9 +42,6 @@ import java.nio.file.Paths;
 public class SplashActivity extends FCLActivity {
 
     public ConstraintLayout background;
-
-    private EulaFragment eulaFragment;
-    private RuntimeFragment runtimeFragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,12 +76,8 @@ public class SplashActivity extends FCLActivity {
                 init();
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE) || ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
-                    // 若用户第一次拒绝了授予，那么将会弹窗提醒用户为什么需要该权限
-                    enableAlertDialog(() -> {
-                        ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, RequestCodes.PERMISSION_REQUEST_CODE);
-                    }, getString(R.string.splash_permission_title), getString(R.string.splash_permission_msg), getString(R.string.splash_permission_grant), getString(R.string.splash_permission_close));
+                    enableAlertDialog(() -> ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, RequestCodes.PERMISSION_REQUEST_CODE), getString(R.string.splash_permission_title), getString(R.string.splash_permission_msg), getString(R.string.splash_permission_grant), getString(R.string.splash_permission_close));
                 } else {
-                    // 没有勾选始终拒绝的化则继续请求权限
                     ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, RequestCodes.PERMISSION_REQUEST_CODE);
                 }
             }
@@ -103,21 +98,15 @@ public class SplashActivity extends FCLActivity {
         FCLPath.loadPaths(this);
         transFile();
         Logging.start(Paths.get(FCLPath.LOG_DIR));
-        initFragments();
         start();
-    }
-
-    private void initFragments() {
-        eulaFragment = new EulaFragment();
-        runtimeFragment = new RuntimeFragment();
     }
 
     public void start() {
         SharedPreferences sharedPreferences = getSharedPreferences("launcher", MODE_PRIVATE);
         if (sharedPreferences.getBoolean("isFirstLaunch", true)) {
-            getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.frag_start_anim, R.anim.frag_stop_anim).replace(R.id.fragment, eulaFragment).commit();
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.frag_start_anim, R.anim.frag_stop_anim).replace(R.id.fragment, EulaFragment.class, null).commit();
         } else {
-            getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.frag_start_anim, R.anim.frag_stop_anim).replace(R.id.fragment, runtimeFragment).commit();
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.frag_start_anim, R.anim.frag_stop_anim).replace(R.id.fragment, RuntimeFragment.class, null).commit();
         }
     }
 
@@ -133,9 +122,11 @@ public class SplashActivity extends FCLActivity {
     }
 
     public void enterLauncher() {
-        finish();
+        RendererPlugin.init(this);
+        DriverPlugin.init(this);
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
     @Override
