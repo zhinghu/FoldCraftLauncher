@@ -16,6 +16,8 @@ import org.lwjgl.*;
 import org.lwjgl.system.*;
 
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.GL_MAJOR_VERSION;
+import static org.lwjgl.opengl.GL30.GL_MINOR_VERSION;
 import static org.lwjgl.system.APIUtil.*;
 import static org.lwjgl.system.Checks.*;
 import static org.lwjgl.system.JNI.*;
@@ -931,8 +933,6 @@ public class GLFW
     }
 
     public static int glfwGetWindowAttrib(@NativeType("GLFWwindow *") long window, int attrib) {
-        if (attrib == GLFW_CONTEXT_VERSION_MAJOR) return 4; // TODO: report actual GL version or add an option for users to select the version
-        if (attrib == GLFW_CONTEXT_VERSION_MINOR) return 6;
         return internalGetWindow(window).windowAttribs.getOrDefault(attrib, 0);
     }
 
@@ -1053,6 +1053,54 @@ public class GLFW
 
         win.windowAttribs.put(GLFW_HOVERED, 1);
         win.windowAttribs.put(GLFW_VISIBLE, 1);
+
+        // Set the Open GL version for context because Forge and derivatives ask for it
+        // Default on 3.3 because mod compat
+        int glMajor = 3;
+        int glMinor = 3;
+        // Custom defaults for specific renderers
+        if (System.getenv("POJAV_RENDERER").equals("vulkan_zink")) {
+            glMajor = 4;
+            glMinor = 6;
+        } else if (System.getenv("POJAV_RENDERER").equals("gallium_virgl")) {
+            glMajor = 4;
+            glMinor = 3;
+        } else if (System.getenv("POJAV_RENDERER").equals("opengles3")) {
+            glMajor = 4;
+            glMinor = 0;
+        }
+        // Get the real values properly
+        FunctionProvider functionProvider = org.lwjgl.opengl.GL.getFunctionProvider();
+        if (functionProvider != null) {
+            // We don't assume createCapabilities has been called nor do we call it
+            // This was based from LWJGL GL.createCapabilities()
+            long GetError    = functionProvider.getFunctionAddress("glGetError");
+            long GetString   = functionProvider.getFunctionAddress("glGetString");
+            long GetIntegerv = functionProvider.getFunctionAddress("glGetIntegerv");
+
+            // Change the default to whatever GL_VERSION can be extracted to, only if higher ver
+            String versionString = memUTF8Safe(callP(GL_VERSION, GetString));
+            if (versionString != null) {
+                try {
+                    APIVersion apiVersion = apiParseVersion(versionString);
+                    if (3 <= apiVersion.major && apiVersion.major <= 4) glMajor = apiVersion.major;
+                    if (3 <= apiVersion.minor && apiVersion.minor <= 6) glMinor = apiVersion.minor;
+                } catch (Throwable ignored){} // In case the string is invalid/garbage
+            }
+
+            // Try to get values from GL30+ driver directly, only use if higher ver
+            try (MemoryStack stack = stackPush()) {
+                IntBuffer version = stack.ints(0);
+                callPV(GL_MAJOR_VERSION, memAddress(version), GetIntegerv);
+                if (callI(GetError) == GL_NO_ERROR &&
+                        3 <= version.get(0) && version.get(0) <= 4) glMajor = version.get(0);
+                callPV(GL_MINOR_VERSION, memAddress(version), GetIntegerv);
+                if (callI(GetError) == GL_NO_ERROR &&
+                        3 <= version.get(0) && version.get(0) <= 4) glMinor = version.get(0);
+            }
+        }
+        win.windowAttribs.put(GLFW_CONTEXT_VERSION_MAJOR, glMajor);
+        win.windowAttribs.put(GLFW_CONTEXT_VERSION_MINOR, glMinor);
 
         mGLFWWindowMap.put(ptr, win);
         mainContext = ptr;
