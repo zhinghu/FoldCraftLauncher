@@ -28,10 +28,10 @@
 
 ✅ **Full Version Support**  
 - Native support for all Minecraft versions (including latest snapshots)
-- Mod loader support: Forge/NeoForge/LiteLoader/OptiFine/Fabric/Quilt...
+- Mod loader support: Forge/NeoForge/LiteLoader/OptiFine/Fabric/Quilt/Cleanroom...
 
 ⚙️ **Key Highlights**  
-- Built-in multi-version Java runtimes (Java 8/11/17/21) with custom Java import support
+- Built-in multi-version Java runtimes (Java 8/17/21/25) with custom Java import support
 - Virtual mouse and customizable key mapping
 - Shaders support (requires VirGL/Zink/MG renderers)
 - Dynamic resource management (mods/modpacks/textures/shaders/saves)
