@@ -27,7 +27,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -110,8 +116,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
                     || normalizedVersion.equals("1.RV-Pre1");
         }
 
-        if (this instanceof LegacySnapshot) {
-            LegacySnapshot snapshot = (LegacySnapshot) this;
+        if (this instanceof LegacySnapshot snapshot) {
             return snapshot.intValue == LegacySnapshot.toInt(15, 14, 'a', false);
         }
 
@@ -157,8 +162,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
     /// @param strictReleaseVersion When `strictReleaseVersion` is `false`, `releaseVersion` is considered less than
     ///                                                                                     its corresponding pre/rc versions.
     public boolean isAtLeast(@NotNull String releaseVersion, @NotNull String snapshotVersion, boolean strictReleaseVersion) {
-        if (this instanceof Release) {
-            Release self = (Release) this;
+        if (this instanceof Release self) {
             Release other;
             if (strictReleaseVersion) {
                 other = Release.parse(releaseVersion);
@@ -264,8 +268,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof Old) {
-                Old that = (Old) o;
+            if (o instanceof Old that) {
                 return this.type == that.type && this.versionNumber.equals(that.versionNumber);
             }
             return false;
@@ -499,18 +502,15 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
 
         @Override
         int compareToImpl(@NotNull GameVersionNumber other) {
-            if (other instanceof Release) {
-                Release release = (Release) other;
+            if (other instanceof Release release) {
                 return compareToRelease(release);
             }
 
-            if (other instanceof LegacySnapshot) {
-                LegacySnapshot snapshot = (LegacySnapshot) other;
+            if (other instanceof LegacySnapshot snapshot) {
                 return compareToSnapshot(snapshot);
             }
 
-            if (other instanceof Special) {
-                Special special = (Special) other;
+            if (other instanceof Special special) {
                 return -special.compareToReleaseOrSnapshot(this);
             }
 
@@ -548,8 +548,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof Release) {
-                Release that = (Release) o;
+            if (o instanceof Release that) {
                 return this.major == that.major
                         && this.minor == that.minor
                         && this.patch == that.patch
@@ -633,18 +632,15 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
 
         @Override
         int compareToImpl(@NotNull GameVersionNumber other) {
-            if (other instanceof Release) {
-                Release otherRelease = (Release) other;
+            if (other instanceof Release otherRelease) {
                 return -otherRelease.compareToSnapshot(this);
             }
 
-            if (other instanceof LegacySnapshot) {
-                LegacySnapshot otherSnapshot = (LegacySnapshot) other;
+            if (other instanceof LegacySnapshot otherSnapshot) {
                 return Integer.compare(this.intValue, otherSnapshot.intValue);
             }
 
-            if (other instanceof Special) {
-                Special otherSpecial = (Special) other;
+            if (other instanceof Special otherSpecial) {
                 return -otherSpecial.compareToReleaseOrSnapshot(this);
             }
 
@@ -714,8 +710,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
 
         GameVersionNumber getPrevNormalVersion() {
             GameVersionNumber v = prev;
-            while (v instanceof Special) {
-                Special special = (Special) v;
+            while (v instanceof Special special) {
                 v = special.prev;
             }
 
@@ -751,8 +746,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
                 return c;
 
             GameVersionNumber v = prev;
-            while (v instanceof Special) {
-                Special special = (Special) v;
+            while (v instanceof Special special) {
                 if (v == other)
                     return 1;
 
@@ -767,8 +761,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
             if (o instanceof Release || o instanceof LegacySnapshot)
                 return compareToReleaseOrSnapshot(o);
 
-            if (o instanceof Special) {
-                Special special = (Special) o;
+            if (o instanceof Special special) {
                 return compareToSpecial(special);
             }
 
@@ -812,8 +805,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
                     if (currentRelease == null)
                         currentRelease = (Release) version;
 
-                    if (version instanceof LegacySnapshot) {
-                        LegacySnapshot snapshot = (LegacySnapshot) version;
+                    if (version instanceof LegacySnapshot snapshot) {
                         snapshots.add(snapshot);
                         snapshotPrev.add(currentRelease);
                     } else if (version instanceof Release) {
@@ -822,8 +814,7 @@ public abstract class GameVersionNumber implements Comparable<GameVersionNumber>
                         if (currentRelease.eaType == Release.ReleaseType.GA) {
                             defaultGameVersions.addFirst(currentRelease.value);
                         }
-                    } else if (version instanceof Special) {
-                        Special special = (Special) version;
+                    } else if (version instanceof Special special) {
                         special.prev = prev;
                         SPECIALS.put(special.value, special);
                     } else
