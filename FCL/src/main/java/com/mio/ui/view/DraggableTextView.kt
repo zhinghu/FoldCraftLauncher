@@ -8,7 +8,6 @@ import android.view.View
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.edit
 import androidx.core.content.withStyledAttributes
-import com.tungsten.fcl.FCLApplication
 import com.tungsten.fcl.R
 import com.tungsten.fcl.util.AndroidUtils
 import com.tungsten.fcllibrary.component.theme.ThemeEngine
@@ -51,18 +50,12 @@ class DraggableTextView @JvmOverloads constructor(
                 val newY = y + deltaY
                 x = newX.coerceIn(0f, maxX.toFloat())
                 y = newY.coerceIn(0f, maxY.toFloat())
-                sharedPreferences.edit {
-                    putFloat("${saveKey}_x", x)
-                    putFloat("${saveKey}_y", y)
-                }
+                updateSavedPosition(x, y)
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 performClick()
-                sharedPreferences.edit {
-                    putFloat("${saveKey}_x", x)
-                    putFloat("${saveKey}_y", y)
-                }
+                updateSavedPosition(x, y)
                 isMoving = false
             }
         }
@@ -75,18 +68,14 @@ class DraggableTextView @JvmOverloads constructor(
     }
 
     fun resetPosition() {
-        sharedPreferences.edit {
-            putFloat("${saveKey}_x", -1f)
-            putFloat("${saveKey}_y", -1f)
-        }
+        updateSavedPosition(-1f, -1f)
         x = (AndroidUtils.getScreenWidth() - width) / 2f
         y = (AndroidUtils.getScreenHeight() - height) / 2f
     }
 
     fun initPosition() {
         post {
-            val xx = sharedPreferences.getFloat("${saveKey}_x", -1f)
-            val yy = sharedPreferences.getFloat("${saveKey}_y", -1f)
+            val (xx, yy) = getSavedPosition()
             if (xx != -1f && yy != -1f) {
                 post {
                     x = xx
@@ -100,5 +89,19 @@ class DraggableTextView @JvmOverloads constructor(
         super.setText(text, type)
         if (!isMoving)
             initPosition()
+    }
+
+    private fun updateSavedPosition(x: Float, y: Float) {
+        sharedPreferences.edit {
+            putFloat("${saveKey}_x", x)
+            putFloat("${saveKey}_y", y)
+        }
+    }
+
+    private fun getSavedPosition(): Pair<Float, Float> {
+        return Pair(
+            sharedPreferences.getFloat("${saveKey}_x", -1f),
+            sharedPreferences.getFloat("${saveKey}_y", -1f)
+        )
     }
 }
