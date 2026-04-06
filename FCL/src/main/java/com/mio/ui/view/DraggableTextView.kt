@@ -52,16 +52,16 @@ class DraggableTextView @JvmOverloads constructor(
                 x = newX.coerceIn(0f, maxX.toFloat())
                 y = newY.coerceIn(0f, maxY.toFloat())
                 sharedPreferences.edit {
-                    putFloat("${saveKey}_fpsX", x)
-                    putFloat("${saveKey}_fpsY", y)
+                    putFloat("${saveKey}_x", x)
+                    putFloat("${saveKey}_y", y)
                 }
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 performClick()
                 sharedPreferences.edit {
-                    putFloat("${saveKey}_fpsX", x)
-                    putFloat("${saveKey}_fpsY", y)
+                    putFloat("${saveKey}_x", x)
+                    putFloat("${saveKey}_y", y)
                 }
                 isMoving = false
             }
@@ -76,8 +76,8 @@ class DraggableTextView @JvmOverloads constructor(
 
     fun resetPosition() {
         sharedPreferences.edit {
-            putFloat("${saveKey}_fpsX", -1f)
-            putFloat("${saveKey}_fpsY", -1f)
+            putFloat("${saveKey}_x", -1f)
+            putFloat("${saveKey}_y", -1f)
         }
         x = (AndroidUtils.getScreenWidth() - width) / 2f
         y = (AndroidUtils.getScreenHeight() - height) / 2f
@@ -85,8 +85,8 @@ class DraggableTextView @JvmOverloads constructor(
 
     fun initPosition() {
         post {
-            val xx = sharedPreferences.getFloat("${saveKey}_fpsX", -1f)
-            val yy = sharedPreferences.getFloat("${saveKey}_fpsY", -1f)
+            val xx = sharedPreferences.getFloat("${saveKey}_x", -1f)
+            val yy = sharedPreferences.getFloat("${saveKey}_y", -1f)
             if (xx != -1f && yy != -1f) {
                 post {
                     x = xx
