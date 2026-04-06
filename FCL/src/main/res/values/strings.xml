@@ -597,6 +597,7 @@
     <string name="menu_settings_show_log">Show Log</string>
     <string name="menu_settings_show_log_auto">Show Log Automatically</string>
     <string name="menu_settings_performance_mode">Sustained Performance Mode</string>
+    <string name="menu_settings_show_memory">Show Memory</string>
 
     <string name="message_cancelled">Operation was cancelled</string>
     <string name="message_copy">Copy successfully!</string>
