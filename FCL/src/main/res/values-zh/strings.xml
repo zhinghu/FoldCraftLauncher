@@ -124,6 +124,7 @@
     <string name="button_remove_confirm">您确定要删除吗？此操作无法撤销！</string>
     <string name="button_save_as">另存为</string>
     <string name="button_select_all">全选</string>
+    <string name="button_select_invert">反选</string>
     <string name="button_set">设置</string>
     <string name="button_reset">重置</string>
     <string name="button_overwrite">覆盖</string>
