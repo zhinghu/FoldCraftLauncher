@@ -351,7 +351,7 @@ public class GameMenu implements MenuCallback, View.OnClickListener {
 
         hideAllViewsProperty.addListener(i -> {
             if (isHideAllViews()) {
-                Toast.makeText(activity, R.string.tip_hide_menu_view, Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, R.string.tip_hide_menu_view, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -442,7 +442,7 @@ public class GameMenu implements MenuCallback, View.OnClickListener {
         menuSetting.getHideMenuViewViewProperty().addListener(i -> {
             menuView.setVisibility(menuSetting.isHideMenuView() ? View.INVISIBLE : View.VISIBLE);
             if (menuSetting.isHideMenuView()) {
-                Toast.makeText(activity, R.string.tip_hide_menu_view, Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, R.string.tip_hide_menu_view, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -719,7 +719,9 @@ public class GameMenu implements MenuCallback, View.OnClickListener {
             }
             return false;
         });
-
+        if (menuSetting.isHideMenuView()) {
+            Toast.makeText(activity, R.string.tip_hide_menu_view, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
