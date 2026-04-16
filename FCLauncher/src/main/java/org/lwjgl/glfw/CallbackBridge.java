@@ -1,6 +1,9 @@
 package org.lwjgl.glfw;
 
-import android.content.*;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.view.Choreographer;
 
 import androidx.annotation.Nullable;
@@ -56,7 +59,7 @@ public class CallbackBridge {
             }
             nativeSendKey(code, scancode, isDown ? 1 : 0, modifiers);
         }
-        if (isDown && keychar != '\u0000') {
+        if (isDown && !Character.isISOControl(keychar)) {
             nativeSendCharMods(keychar, modifiers);
             nativeSendChar(keychar);
         }
@@ -228,6 +231,7 @@ public class CallbackBridge {
     private static native void nativeSendScreenSize(int width, int height);
 
     public static native void nativeSetWindowAttrib(int attrib, int value);
+
     public static native void setupBridgeWindow(Object surface);
 
     public static native int getFps();
