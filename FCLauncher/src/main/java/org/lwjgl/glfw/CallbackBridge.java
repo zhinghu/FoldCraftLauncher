@@ -1,5 +1,6 @@
 package org.lwjgl.glfw;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
@@ -8,11 +9,12 @@ import android.view.Choreographer;
 
 import androidx.annotation.Nullable;
 
+import com.tungsten.fcl.FCLApplication;
 import com.tungsten.fclauncher.bridge.FCLBridge;
 import com.tungsten.fclauncher.keycodes.LwjglGlfwKeycode;
 import com.tungsten.fclauncher.keycodes.LwjglKeycodeMap;
-import com.tungsten.fclauncher.utils.FCLPath;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -117,26 +119,30 @@ public class CallbackBridge {
     // Called from JRE side
     @SuppressWarnings("unused")
     public static @Nullable String accessAndroidClipboard(int type, String copy) {
-        ClipboardManager clipboard = (ClipboardManager) FCLPath.CONTEXT.getSystemService(Context.CLIPBOARD_SERVICE);
-        switch (type) {
-            case CLIPBOARD_COPY:
-                ClipData clip = ClipData.newPlainText("FCL Clipboard", copy);
-                clipboard.setPrimaryClip(clip);
-                return null;
-
-            case CLIPBOARD_PASTE:
-                if (clipboard.hasPrimaryClip() && clipboard.getPrimaryClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-                    return clipboard.getPrimaryClip().getItemAt(0).getText().toString();
-                } else {
-                    return "";
+        Activity activity = FCLApplication.getCurrentActivity();
+        AtomicReference<String> result = new AtomicReference<>();
+        if (activity != null) {
+            activity.runOnUiThread(() -> {
+                ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                switch (type) {
+                    case CLIPBOARD_COPY:
+                        ClipData clip = ClipData.newPlainText("FCL Clipboard", copy);
+                        clipboard.setPrimaryClip(clip);
+                        break;
+                    case CLIPBOARD_PASTE:
+                        if (clipboard.hasPrimaryClip() && clipboard.getPrimaryClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+                            result.set(clipboard.getPrimaryClip().getItemAt(0).getText().toString());
+                        } else {
+                            result.set("");
+                        }
+                        break;
+                    case CLIPBOARD_OPEN:
+                        FCLBridge.openLink(copy);
+                        break;
                 }
-
-            case CLIPBOARD_OPEN:
-                FCLBridge.openLink(copy);
-                return null;
-            default:
-                return null;
+            });
         }
+        return result.get();
     }
 
 
