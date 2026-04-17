@@ -166,7 +166,7 @@ public class DownloadPage extends FCLCommonPage implements ManageUI.VersionLoada
                     if (DownloadPage.this instanceof ModDownloadPage && selectedModLoader != null) {
                         list = (ArrayList<RemoteMod>) list.parallelStream().filter(mod -> {
                             try {
-                                return mod.getData().loadVersions(repository).flatMap(v -> v.getLoaders().stream()).collect(Collectors.toList()).contains(selectedModLoader);
+                                return mod.getData().loadVersions(repository).flatMap(v -> v.getLoaders().stream()).collect(Collectors.toCollection(ArrayList::new)).contains(selectedModLoader);
                             } catch (Throwable ignore) {
                             }
                             return true;
@@ -293,8 +293,10 @@ public class DownloadPage extends FCLCommonPage implements ManageUI.VersionLoada
             FXUtils.bindSelection(sourceSpinner, downloadSource);
         }
 
-        gameVersionSpinner.setDataList(new ArrayList<>(Arrays.stream(RemoteModRepository.DEFAULT_GAME_VERSIONS).collect(Collectors.toList())));
-        ArrayAdapter<String> gameVersionAdapter = new ArrayAdapter<>(getContext(), R.layout.item_spinner_auto_tint, new ArrayList<>(Arrays.stream(RemoteModRepository.DEFAULT_GAME_VERSIONS).collect(Collectors.toList())));
+        ArrayList<String> versionList = Arrays.stream(RemoteModRepository.DEFAULT_GAME_VERSIONS).collect(Collectors.toCollection(ArrayList::new));
+        versionList.add(0, "");
+        gameVersionSpinner.setDataList(versionList);
+        ArrayAdapter<String> gameVersionAdapter = new ArrayAdapter<>(getContext(), R.layout.item_spinner_auto_tint, versionList);
         gameVersionAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
         gameVersionSpinner.setAdapter(gameVersionAdapter);
         gameVersionSpinner.setSelection(0);
