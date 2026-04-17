@@ -5,7 +5,6 @@ import static com.tungsten.fclcore.util.Logging.LOG;
 
 import com.tungsten.fclcore.download.DownloadProvider;
 import com.tungsten.fclcore.download.VersionList;
-import com.tungsten.fclcore.util.Lang;
 import com.tungsten.fclcore.util.io.HttpRequest;
 
 import java.util.Collections;
