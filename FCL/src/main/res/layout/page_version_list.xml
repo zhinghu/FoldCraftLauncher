@@ -84,6 +84,7 @@
 
                     <com.tungsten.fcllibrary.component.view.FCLRadioButton
                         android:id="@+id/all"
+                        android:layout_marginStart="5dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
