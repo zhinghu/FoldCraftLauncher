@@ -80,13 +80,13 @@ class LocalModListAdapter(context: Context, private val modListPage: ModListPage
     private var fromSelf = false
 
     init {
-        this.listProperty.addListener { observable: Observable? ->
+        this.listProperty.addListener { _: Observable? ->
             fromSelf = true
             selectedItemsProperty.clear()
             fromSelf = false
             notifyDataSetChanged()
         }
-        selectedItemsProperty.addListener { observable: Observable? ->
+        selectedItemsProperty.addListener { _: Observable? ->
             if (!fromSelf) {
                 notifyDataSetChanged()
             }

@@ -500,7 +500,7 @@ public class ModListPage extends FCLCommonPage implements ManageUI.VersionLoadab
 
             // Do we need to search in the background thread?
             for (ModInfoObject item : itemsProperty.get()) {
-                if (predicate.test(item.getModInfo().getFileName())) {
+                if (predicate.test(item.getModInfo().getFileName()) || (item.getRemoteMod() != null && predicate.test(item.getRemoteMod().getTitle()))) {
                     adapter.listProperty().add(item);
                 }
             }
